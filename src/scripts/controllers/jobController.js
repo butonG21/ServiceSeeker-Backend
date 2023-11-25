@@ -6,7 +6,12 @@ const createJob = async (req, res) => {
       title, category, budget, duration, location,
     } = req.body;
 
-    // Ensure to convert location to the correct format
+    // hanya role tertentu yang dapat membuat pekerjaan
+    if (req.user.role !== 'employer') {
+      return res.status(403).json({ message: 'Access denied. Only employers can create jobs.' });
+    }
+
+    // Pastikan untuk mengonversi lokasi ke format yang sesuai dengan schema
     const newJob = new Job({
       title,
       category,
