@@ -39,7 +39,10 @@ const register = async (req, res) => {
     // Simpan pengguna di database
     await newUser.save();
 
-    res.status(201).json({ message: 'User registered successfully' });
+    res.status(201).json({
+      status: 'succsess',
+      message: 'User registered successfully',
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
@@ -64,12 +67,16 @@ const login = async (req, res) => {
     }
 
     // Buat dan kirim token JWT
-    const token = jwt.sign({ username: user.username, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ username: user.username, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
     res.json({
-      status: 'succes',
+      status: 'success',
       message: 'login succsesfull',
-      token,
+      data: {
+        username: user.username,
+        role: user.role,
+        token,
+      },
     });
   } catch (error) {
     console.error(error);
