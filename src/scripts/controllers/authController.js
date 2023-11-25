@@ -13,7 +13,9 @@ const register = async (req, res) => {
     }
 
     // Destructuring data dari body
-    const { username, password, role, fullName, phoneNumber } = req.body;
+    const {
+      username, password, role, fullName, phoneNumber,
+    } = req.body;
 
     // Periksa apakah pengguna sudah terdaftar
     const existingUser = await User.findOne({ username });
@@ -64,7 +66,11 @@ const login = async (req, res) => {
     // Buat dan kirim token JWT
     const token = jwt.sign({ username: user.username, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({ token });
+    res.json({
+      status: 'succes',
+      message: 'login succsesfull',
+      token,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
