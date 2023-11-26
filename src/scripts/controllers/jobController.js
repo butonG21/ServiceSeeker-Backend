@@ -1,27 +1,35 @@
 const Job = require('../models/Job');
+geocodeAddress = require('../utils/geocoding');
 
 const createJob = async (req, res) => {
   try {
     const {
-      title, category, budget, duration, location,
+      title, category, budget, startDate, endDate, address, description,
     } = req.body;
 
-    // hanya role tertentu yang dapat membuat pekerjaan
-    if (req.user.role !== 'employer') {
-      return res.status(403).json({ message: 'Access denied. Only employers can create jobs.' });
+    // Geocode alamat menjadi koordinat
+    const location = await geocodeAddress(address);
+
+    // Pastikan geocoding berhasil sebelum menyimpan pekerjaan
+    if (!location) {
+      return res.status(400).json({ message: 'Geocoding failed for the provided address.' });
     }
 
-    // Pastikan untuk mengonversi lokasi ke format yang sesuai dengan schema
     const newJob = new Job({
       title,
+      description,
       category,
       budget,
-      duration,
+      startDate,
+      endDate,
+      address,
       location: {
         type: 'Point',
         coordinates: [location.longitude, location.latitude],
       },
-      employer: req.user.username,
+      createdBy: req.user.username,
+      status: 'Open', // Set status to Open when creating a new job
+      createdAt: new Date(), // Add timestamp of job creation
     });
 
     await newJob.save();
