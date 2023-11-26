@@ -1,8 +1,10 @@
 const axios = require('axios');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const geocodeAddress = async (address) => {
   try {
-    // Geocoding API
     const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
       params: {
         address,
@@ -10,13 +12,17 @@ const geocodeAddress = async (address) => {
       },
     });
 
-    // Ambil hasil koordinat dari response API
-    const { location } = response.data.results[0].geometry;
+    const { data } = response;
 
-    return { lng: location.lng, lat: location.lat };
+    if (data.results.length > 0) {
+      const { location } = data.results[0].geometry;
+      return { longitude: location.lng, latitude: location.lat };
+    }
+
+    return null;
   } catch (error) {
     console.error('Error during geocoding:', error);
-    throw new Error('Error during geocoding');
+    return null;
   }
 };
 
