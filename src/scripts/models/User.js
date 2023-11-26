@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: ['employer', 'job_seeker'], required: true },
   password: { type: String, required: true },
   address: { type: String, maxlength: 255 },
+  createdAt: { type: Date, default: Date.now },
 });
 
 const User = mongoose.model('User', userSchema);
