@@ -7,9 +7,9 @@ const maxFirstNameLength = 20;
 const maxLastNameLength = 20;
 
 const registerValidationRules = [
-  check('firstName').isLength({ min: 1, max: maxFirstNameLength }).escape().withMessage(`First name should not exceed ${maxFirstNameLength} characters.`),
+  check('firstName').isLength({ min: 3, max: maxFirstNameLength }).escape().withMessage(`First name should not exceed ${maxFirstNameLength} characters.`),
 
-  check('lastName').optional().isLength({ min: 1, max: maxLastNameLength }).escape()
+  check('lastName').optional().isLength({ min: 3, max: maxLastNameLength }).escape()
     .withMessage(`Last name should not exceed ${maxLastNameLength} characters.`),
 
   check('username').escape().custom(async (username) => {
