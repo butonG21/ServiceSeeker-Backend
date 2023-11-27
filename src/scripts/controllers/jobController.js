@@ -85,6 +85,11 @@ const searchJobs = async (req, res) => {
       query.budget = { $gte: budgetRange.min, $lte: budgetRange.max };
     }
 
+    // Tambahkan pencarian berdasarkan title jika disertakan dalam permintaan
+    if (title) {
+      query.title = { $regex: title, $options: 'i' }; // i untuk case-insensitive
+    }
+
     const jobs = await Job.find(query);
 
     // Tambahkan informasi jarak ke setiap pekerjaan dalam hasil pencarian
