@@ -61,7 +61,7 @@ const getAllJobs = async (req, res) => {
 const searchJobs = async (req, res) => {
   try {
     const {
-      category, location, radius, budgetRange,
+      title, category, location, radius, budgetRange,
     } = req.body;
 
     const query = {
