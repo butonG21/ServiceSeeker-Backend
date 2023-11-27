@@ -64,6 +64,8 @@ const searchJobs = async (req, res) => {
       title, category, location, radius, budgetRange,
     } = req.body;
 
+    const searchRadius = radius || 10;
+
     const query = {
       location: {
         $nearSphere: {
@@ -71,7 +73,7 @@ const searchJobs = async (req, res) => {
             type: 'Point',
             coordinates: [location.longitude, location.latitude],
           },
-          $maxDistance: radius * 1000, // radius dalam meter
+          $maxDistance: searchRadius * 1000, // radius dalam meter
         },
       },
     };
