@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 const Job = require('../models/Job');
-geocodeAddress = require('../utils/geocoding');
+const geocodeAddress = require('../utils/geocoding');
 
 const createJob = async (req, res) => {
   try {
