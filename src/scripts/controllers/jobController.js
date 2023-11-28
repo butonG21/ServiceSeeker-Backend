@@ -61,17 +61,34 @@ const getAllJobs = async (req, res) => {
 const searchJobs = async (req, res) => {
   try {
     const {
-      title, category, location, radius, budgetRange,
+      title, category, address, radius, budgetRange,
     } = req.body;
 
     const searchRadius = radius || 10;
 
+    let userLocation;
+
+    // Jika alamat pengguna tersedia dalam permintaan, konversi alamat ke koordinat
+    if (address) {
+      userLocation = await geocodeAddress(address);
+    } else if (req.user.location) {
+      // Jika alamat tidak tersedia dalam permintaan, gunakan lokasi dari database
+      userLocation = { latitude: req.user.location.coordinates[1], longitude: req.user.location.coordinates[0] };
+      console.log(userLocation);
+    }
+
+    // Pastikan lokasi atau alamat valid
+    if (!userLocation) {
+      return res.status(400).json({ message: 'Invalid address or location.' });
+    }
+
+    // Selanjutnya, gunakan userLocation untuk pencarian pekerjaan
     const query = {
       location: {
         $nearSphere: {
           $geometry: {
             type: 'Point',
-            coordinates: [location.longitude, location.latitude],
+            coordinates: [userLocation.longitude, userLocation.latitude],
           },
           $maxDistance: searchRadius * 1000, // radius dalam meter
         },
@@ -97,7 +114,7 @@ const searchJobs = async (req, res) => {
 
     // Tambahkan informasi jarak ke setiap pekerjaan dalam hasil pencarian
     const jobsWithDistance = jobs.map((job) => {
-      const distance = calculateDistance(location.latitude, location.longitude, job.location.coordinates[1], job.location.coordinates[0]);
+      const distance = calculateDistance(userLocation.latitude, userLocation.longitude, job.location.coordinates[1], job.location.coordinates[0]);
       return { ...job._doc, distance };
     });
 
