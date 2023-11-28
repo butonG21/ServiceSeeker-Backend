@@ -13,4 +13,7 @@ router.get('/all', jobController.getAllJobs);
 // Pencarian pekerjaan
 router.post('/search', authenticateToken, jobController.searchJobs);
 
+// Job detail by id
+router.get('/:jobId', jobController.jobDetail);
+
 module.exports = router;

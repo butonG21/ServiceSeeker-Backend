@@ -112,6 +112,20 @@ const searchJobs = async (req, res) => {
 
     const jobs = await Job.find(query);
 
+    const deg2rad = (deg) => deg * (Math.PI / 180);
+
+    // Fungsi untuk menghitung jarak antara dua titik koordinat menggunakan formula Haversine
+    const calculateDistance = (lat1, lon1, lat2, lon2) => {
+      const R = 6371; // Radius bumi dalam kilometer
+      const dLat = deg2rad(lat2 - lat1);
+      const dLon = deg2rad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+    + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distance = R * c; // Jarak dalam kilometer
+      return distance.toFixed(2); // Mengambil dua desimal pertama
+    };
+
     // Tambahkan informasi jarak ke setiap pekerjaan dalam hasil pencarian
     const jobsWithDistance = jobs.map((job) => {
       const distance = calculateDistance(userLocation.latitude, userLocation.longitude, job.location.coordinates[1], job.location.coordinates[0]);
@@ -125,18 +139,26 @@ const searchJobs = async (req, res) => {
   }
 };
 
-// Fungsi untuk menghitung jarak antara dua titik koordinat menggunakan formula Haversine
-const calculateDistance = (lat1, lon1, lat2, lon2) => {
-  const R = 6371; // Radius bumi dalam kilometer
-  const dLat = deg2rad(lat2 - lat1);
-  const dLon = deg2rad(lon2 - lon1);
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-    + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const distance = R * c; // Jarak dalam kilometer
-  return distance.toFixed(2); // Mengambil dua desimal pertama
+const jobDetail = async (req, res) => {
+  try {
+    const { jobId } = req.params;
+
+    // Temukan pekerjaan berdasarkan ID
+    const job = await Job.findById(jobId);
+
+    // Periksa apakah pekerjaan ditemukan
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found.' });
+    }
+
+    // Tampilkan detail pekerjaan
+    res.json({ success: true, job });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
 };
 
-const deg2rad = (deg) => deg * (Math.PI / 180);
-
-module.exports = { createJob, getAllJobs, searchJobs };
+module.exports = {
+  createJob, getAllJobs, searchJobs, jobDetail,
+};
