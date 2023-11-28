@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+const mongoose = require('mongoose');
 const Job = require('../models/Job');
 const geocodeAddress = require('../utils/geocoding');
 
@@ -35,7 +36,7 @@ const createJob = async (req, res) => {
       },
       createdBy: req.user.username,
       status: 'Open', // Set status to Open when creating a new job
-      createdAt: new Date(), // Add timestamp of job creation
+      createdAt: new Date().toISOString(), // Add timestamp of job creation
     });
 
     await newJob.save();
@@ -141,7 +142,17 @@ const searchJobs = async (req, res) => {
 
 const jobDetail = async (req, res) => {
   try {
-    const { jobId } = req.params;
+    const jobId = req.query.id;
+
+    // Pastikan jobId tidak kosong
+    if (!jobId) {
+      return res.status(400).json({ message: 'Job ID is required.' });
+    }
+
+    // Pastikan jobId adalah ObjectId yang valid
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({ message: 'Invalid Job ID.' });
+    }
 
     // Temukan pekerjaan berdasarkan ID
     const job = await Job.findById(jobId);
@@ -159,6 +170,93 @@ const jobDetail = async (req, res) => {
   }
 };
 
+const editJobById = async (req, res) => {
+  try {
+    const jobId = req.query.id;
+
+    // Pastikan jobId tidak kosong
+    if (!jobId) {
+      return res.status(400).json({ message: 'Job ID is required.' });
+    }
+
+    // Pastikan jobId adalah ObjectId yang valid
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({ message: 'Invalid Job ID.' });
+    }
+
+    // Periksa apakah tidak ada data yang dikirimkan dalam body request
+    if (Object.keys(req.body).length === 0) {
+      return res.status(400).json({ message: 'No data provided for update.' });
+    }
+
+    // Dapatkan data pekerjaan yang akan diubah dari request body
+    const dataToUpdate = {
+      title: req.body.title,
+      description: req.body.description,
+      category: req.body.category,
+      budget: req.body.budget,
+      startDate: req.body.startDate,
+      endDate: req.body.endDate,
+      address: req.body.address,
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Periksa apakah tidak ada properti yang diubah
+    if (Object.values(dataToUpdate).every((value) => value === undefined)) {
+      return res.status(400).json({ message: 'No data updated.' });
+    }
+
+    // Iterasi melalui data yang akan diubah dan update hanya jika ada nilai
+    Object.entries(dataToUpdate).forEach(([key, value]) => {
+      if (value !== undefined) {
+        req.job[key] = value;
+      }
+    });
+    // Jika alamat diubah, update juga koordinat lokasi
+    if (req.body.address) {
+      const newLocation = await geocodeAddress(req.body.address);
+      // Pastikan lokasi atau alamat valid
+      if (!newLocation) {
+        return res.status(400).json({ message: 'Invalid address or location.' });
+      }
+      if (newLocation) {
+        req.job.location.coordinates = [newLocation.longitude, newLocation.latitude];
+      }
+    }
+
+    // Simpan perubahan ke dalam database
+    await req.job.save();
+
+    res.json({ success: true, message: 'Job updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+};
+
+const deleteJobById = async (req, res) => {
+  try {
+    const jobId = req.query.id;
+
+    // Pastikan jobId tidak kosong
+    if (!jobId) {
+      return res.status(400).json({ message: 'Job ID is required.' });
+    }
+
+    // Pastikan jobId adalah ObjectId yang valid
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({ message: 'Invalid Job ID.' });
+    }
+
+    // Hapus pekerjaan dari database
+    await Job.findByIdAndDelete(jobId);
+
+    res.json({ success: true, message: 'Job deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+};
 module.exports = {
-  createJob, getAllJobs, searchJobs, jobDetail,
+  createJob, getAllJobs, searchJobs, jobDetail, editJobById, deleteJobById,
 };
