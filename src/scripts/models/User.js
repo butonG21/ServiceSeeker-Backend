@@ -10,6 +10,17 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: ['employer', 'job_seeker'], required: true },
   password: { type: String, required: true },
   address: { type: String, maxlength: 255 },
+  location: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point',
+    },
+    coordinates: {
+      type: [Number],
+      required: true,
+    },
+  },
   createdAt: { type: Date, default: Date.now },
 });
 
