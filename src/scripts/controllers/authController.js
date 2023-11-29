@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { validationResult, check } = require('express-validator');
 const User = require('../models/User');
+const geocodeAddress = require('../utils/geocoding');
 
 const maxFirstNameLength = 20;
 const maxLastNameLength = 20;
@@ -68,6 +69,14 @@ const register = async (req, res) => {
       firstName, lastName, username, email, phone, role, password, address,
     } = req.body;
 
+    // Geocode alamat menjadi koordinat
+    const location = await geocodeAddress(address);
+
+    // Pastikan geocoding berhasil sebelum melanjutkan
+    if (!location) {
+      return res.status(400).json({ message: 'Geocoding failed for the provided address.' });
+    }
+
     // Hash password
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -86,6 +95,10 @@ const register = async (req, res) => {
       role,
       password: hashedPassword,
       address,
+      location: {
+        type: 'Point',
+        coordinates: [location.longitude, location.latitude],
+      },
     });
 
     // Simpan pengguna di database
@@ -115,15 +128,23 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid username or password.' });
     }
 
+    // Set objek req.user dengan data pengguna, termasuk alamat
+    req.user = {
+      username: user.username,
+      role: user.role,
+      address: user.address, // Tambahkan alamat ke objek req.user
+    };
+
     // Buat dan kirim token JWT
-    const token = jwt.sign({ username: user.username, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    const token = jwt.sign({ username: user.username, role: user.role, location: user.location }, process.env.JWT_SECRET, { expiresIn: '24h' });
 
     res.json({
       status: 'success',
-      message: 'login succsesfull',
+      message: 'Login successful',
       data: {
         username: user.username,
         role: user.role,
+        address: user.address,
         token,
       },
     });
@@ -132,7 +153,6 @@ const login = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
-
 module.exports = {
   register,
   login,

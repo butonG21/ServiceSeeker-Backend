@@ -1,6 +1,7 @@
 const express = require('express');
 const jobController = require('../controllers/jobController');
 const authenticateToken = require('../middleware/authenticateToken');
+const checkJobOwnership = require('../middleware/jobOwnership');
 
 const router = express.Router();
 
@@ -12,5 +13,17 @@ router.get('/all', jobController.getAllJobs);
 
 // Pencarian pekerjaan
 router.post('/search', authenticateToken, jobController.searchJobs);
+
+// Job detail by id
+router.get('/detail', jobController.jobDetail);
+
+// update jobs
+router.put('/edit', authenticateToken, checkJobOwnership, jobController.editJobById);
+
+// delete job
+router.delete('/delete', authenticateToken, checkJobOwnership, jobController.deleteJobById);
+
+// Apply for a job
+router.post('/apply', authenticateToken, jobController.applyForJob);
 
 module.exports = router;
