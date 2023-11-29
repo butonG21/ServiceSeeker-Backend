@@ -23,4 +23,7 @@ router.put('/edit', authenticateToken, checkJobOwnership, jobController.editJobB
 // delete job
 router.delete('/delete', authenticateToken, checkJobOwnership, jobController.deleteJobById);
 
+// Apply for a job
+router.post('/apply', authenticateToken, jobController.applyForJob);
+
 module.exports = router;
