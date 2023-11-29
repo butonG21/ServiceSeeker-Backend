@@ -75,7 +75,6 @@ const searchJobs = async (req, res) => {
     } else if (req.user.location) {
       // Jika alamat tidak tersedia dalam permintaan, gunakan lokasi dari database
       userLocation = { latitude: req.user.location.coordinates[1], longitude: req.user.location.coordinates[0] };
-      console.log(userLocation);
     }
 
     // Pastikan lokasi atau alamat valid
@@ -257,6 +256,54 @@ const deleteJobById = async (req, res) => {
     res.status(500).json({ success: false, error: 'Internal Server Error' });
   }
 };
+
+const applyForJob = async (req, res) => {
+  try {
+    console.log('Apply for job function called.');
+    const jobId = req.query.id;
+    console.log('Job ID:', jobId);
+
+    // Temukan pekerjaan berdasarkan ID
+    const job = await Job.findById(jobId);
+
+    // Periksa apakah pekerjaan ditemukan
+    if (!job) {
+      return res.status(404).json({ message: 'Job not found.' });
+    }
+
+    // Periksa apakah status pekerjaan adalah "Open"
+    if (job.status !== 'Open') {
+      return res.status(400).json({ message: 'Job cannot be applied. It is not in Open status.' });
+    }
+
+    // Periksa apakah user memiliki role "job_seeker"
+    if (req.user.role !== 'job_seeker') {
+      return res.status(403).json({ message: 'Access denied. Only job_seekers can apply for jobs.' });
+    }
+
+    // Periksa apakah job_seeker sudah mengajukan pekerjaan sebelumnya
+    if (job.assignedTo) {
+      return res.status(400).json({ message: 'Job has already been assigned.' });
+    }
+
+    // Setel assignedTo dengan ID job_seeker yang mengambil pekerjaan
+    job.TakenBY = req.user.username;
+
+    // Setel status pekerjaan menjadi "In Progress"
+    job.status = 'Process';
+
+    // Simpan perubahan ke dalam database
+    await job.save();
+
+    res.json({
+      success: true, message: 'Job applied successfully', jobId,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'Internal Server Error' });
+  }
+};
+
 module.exports = {
-  createJob, getAllJobs, searchJobs, jobDetail, editJobById, deleteJobById,
+  createJob, getAllJobs, searchJobs, jobDetail, editJobById, deleteJobById, applyForJob,
 };
