@@ -11,7 +11,10 @@ const createJob = async (req, res) => {
 
     // hanya role tertentu yang dapat membuat pekerjaan
     if (req.user.role !== 'employer') {
-      return res.status(403).json({ message: 'Access denied. Only employers can create jobs.' });
+      return res.status(403).json({
+        status: ' Failed',
+        message: 'Access denied. Only employers can create jobs.',
+      });
     }
 
     // Geocode alamat menjadi koordinat
@@ -19,7 +22,10 @@ const createJob = async (req, res) => {
 
     // memastikan geocoding berhasil sebelum menyimpan pekerjaan
     if (!location) {
-      return res.status(400).json({ message: 'Geocoding failed for the provided address.' });
+      return res.status(400).json({
+        status: ' Failed',
+        message: 'Geocoding failed for the provided address.',
+      });
     }
 
     const newJob = new Job({
@@ -39,12 +45,29 @@ const createJob = async (req, res) => {
       createdAt: new Date().toISOString(), // Add timestamp of job creation
     });
 
+    // Validasi startDate
+    const currentDate = new Date();
+    const jobStartDate = new Date(startDate);
+
+    if (jobStartDate < currentDate) {
+      return res.status(400).json({
+        status: ' Failed',
+        message: 'Start date must be equal to or greater than the current date.',
+      });
+    }
+
     await newJob.save();
 
-    res.status(201).json({ message: 'Job created successfully' });
+    res.status(201).json({
+      status: ' Success',
+      message: 'Job created successfully',
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({
+      status: ' Failed',
+      message: 'Internal server error',
+    });
   }
 };
 
@@ -55,7 +78,10 @@ const getAllJobs = async (req, res) => {
     res.json(jobs);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({
+      status: ' Failed',
+      message: 'Internal server error',
+    });
   }
 };
 
@@ -63,23 +89,34 @@ const searchJobs = async (req, res) => {
   try {
     const {
       title, category, address, radius, budgetRange,
-    } = req.body;
+    } = req.query;
 
     const searchRadius = radius || 10;
 
     let userLocation;
 
+    // Pastikan hanya pengguna yang login yang dapat menggunakan fitur ini
+    if (!req.user || !req.user.location) {
+      return res.status(403).json({
+        status: ' Failed',
+        message: 'Access denied. Only logged-in users can use this feature.',
+      });
+    }
+
     // Jika alamat pengguna tersedia dalam permintaan, konversi alamat ke koordinat
     if (address) {
       userLocation = await geocodeAddress(address);
-    } else if (req.user.location) {
+    } else {
       // Jika alamat tidak tersedia dalam permintaan, gunakan lokasi dari database
       userLocation = { latitude: req.user.location.coordinates[1], longitude: req.user.location.coordinates[0] };
     }
 
     // Pastikan lokasi atau alamat valid
     if (!userLocation) {
-      return res.status(400).json({ message: 'Invalid address or location.' });
+      return res.status(400).json({
+        status: ' Failed',
+        message: 'Invalid address or location.',
+      });
     }
 
     // Selanjutnya, gunakan userLocation untuk pencarian pekerjaan
@@ -120,7 +157,7 @@ const searchJobs = async (req, res) => {
       const dLat = deg2rad(lat2 - lat1);
       const dLon = deg2rad(lon2 - lon1);
       const a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-    + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       const distance = R * c; // Jarak dalam kilometer
       return distance.toFixed(2); // Mengambil dua desimal pertama
@@ -141,16 +178,22 @@ const searchJobs = async (req, res) => {
 
 const jobDetail = async (req, res) => {
   try {
-    const jobId = req.query.id;
+    const jobId = req.params.id;
 
     // Pastikan jobId tidak kosong
     if (!jobId) {
-      return res.status(400).json({ message: 'Job ID is required.' });
+      return res.status(400).json({
+        status: ' Failed',
+        message: 'Job ID is required.',
+      });
     }
 
     // Pastikan jobId adalah ObjectId yang valid
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
-      return res.status(400).json({ message: 'Invalid Job ID.' });
+      return res.status(400).json({
+        status: ' Failed',
+        message: 'Invalid Job ID.',
+      });
     }
 
     // Temukan pekerjaan berdasarkan ID
@@ -158,7 +201,10 @@ const jobDetail = async (req, res) => {
 
     // Periksa apakah pekerjaan ditemukan
     if (!job) {
-      return res.status(404).json({ message: 'Job not found.' });
+      return res.status(404).json({
+        status: ' Failed',
+        message: 'Job not found.',
+      });
     }
 
     // Tampilkan detail pekerjaan
@@ -171,21 +217,30 @@ const jobDetail = async (req, res) => {
 
 const editJobById = async (req, res) => {
   try {
-    const jobId = req.query.id;
+    const jobId = req.params.id;
 
     // Pastikan jobId tidak kosong
     if (!jobId) {
-      return res.status(400).json({ message: 'Job ID is required.' });
+      return res.status(400).json({
+        status: ' Failed',
+        message: 'Job ID is required.',
+      });
     }
 
     // Pastikan jobId adalah ObjectId yang valid
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
-      return res.status(400).json({ message: 'Invalid Job ID.' });
+      return res.status(400).json({
+        status: ' Failed',
+        message: 'Invalid Job ID.',
+      });
     }
 
     // Periksa apakah tidak ada data yang dikirimkan dalam body request
     if (Object.keys(req.body).length === 0) {
-      return res.status(400).json({ message: 'No data provided for update.' });
+      return res.status(400).json({
+        status: ' Failed',
+        message: 'No data provided for update.',
+      });
     }
 
     // Dapatkan data pekerjaan yang akan diubah dari request body
@@ -202,7 +257,10 @@ const editJobById = async (req, res) => {
 
     // Periksa apakah tidak ada properti yang diubah
     if (Object.values(dataToUpdate).every((value) => value === undefined)) {
-      return res.status(400).json({ message: 'No data updated.' });
+      return res.status(400).json({
+        status: ' Failed',
+        message: 'No data updated.',
+      });
     }
 
     // Iterasi melalui data yang akan diubah dan update hanya jika ada nilai
@@ -216,7 +274,10 @@ const editJobById = async (req, res) => {
       const newLocation = await geocodeAddress(req.body.address);
       // Pastikan lokasi atau alamat valid
       if (!newLocation) {
-        return res.status(400).json({ message: 'Invalid address or location.' });
+        return res.status(400).json({
+          status: ' Failed',
+          message: 'Invalid address or location.',
+        });
       }
       if (newLocation) {
         req.job.location.coordinates = [newLocation.longitude, newLocation.latitude];
@@ -226,7 +287,11 @@ const editJobById = async (req, res) => {
     // Simpan perubahan ke dalam database
     await req.job.save();
 
-    res.json({ success: true, message: 'Job updated successfully' });
+    res.json({
+      success: true,
+      status: ' success',
+      message: 'Job updated successfully',
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: 'Internal Server Error' });
@@ -235,22 +300,32 @@ const editJobById = async (req, res) => {
 
 const deleteJobById = async (req, res) => {
   try {
-    const jobId = req.query.id;
+    const jobId = req.params.id;
 
     // Pastikan jobId tidak kosong
     if (!jobId) {
-      return res.status(400).json({ message: 'Job ID is required.' });
+      return res.status(400).json({
+        status: ' Failed',
+        message: 'Job ID is required.',
+      });
     }
 
     // Pastikan jobId adalah ObjectId yang valid
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
-      return res.status(400).json({ message: 'Invalid Job ID.' });
+      return res.status(400).json({
+        status: ' Failed',
+        message: 'Invalid Job ID.',
+      });
     }
 
     // Hapus pekerjaan dari database
     await Job.findByIdAndDelete(jobId);
 
-    res.json({ success: true, message: 'Job deleted successfully' });
+    res.json({
+      success: true,
+      status: ' success',
+      message: 'Job deleted successfully',
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: 'Internal Server Error' });
@@ -259,31 +334,41 @@ const deleteJobById = async (req, res) => {
 
 const applyForJob = async (req, res) => {
   try {
-    console.log('Apply for job function called.');
-    const jobId = req.query.id;
-    console.log('Job ID:', jobId);
+    const jobId = req.params.id;
 
     // Temukan pekerjaan berdasarkan ID
     const job = await Job.findById(jobId);
 
     // Periksa apakah pekerjaan ditemukan
     if (!job) {
-      return res.status(404).json({ message: 'Job not found.' });
+      return res.status(404).json({
+        status: ' Failed',
+        message: 'Job not found.',
+      });
     }
 
     // Periksa apakah status pekerjaan adalah "Open"
     if (job.status !== 'Open') {
-      return res.status(400).json({ message: 'Job cannot be applied. It is not in Open status.' });
+      return res.status(400).json({
+        status: ' Failed',
+        message: 'Job cannot be applied. It is not in Open status.',
+      });
     }
 
     // Periksa apakah user memiliki role "job_seeker"
     if (req.user.role !== 'job_seeker') {
-      return res.status(403).json({ message: 'Access denied. Only job_seekers can apply for jobs.' });
+      return res.status(403).json({
+        status: ' Failed',
+        message: 'Access denied. Only job_seekers can apply for jobs.',
+      });
     }
 
     // Periksa apakah job_seeker sudah mengajukan pekerjaan sebelumnya
     if (job.assignedTo) {
-      return res.status(400).json({ message: 'Job has already been assigned.' });
+      return res.status(400).json({
+        status: ' Failed',
+        message: 'Job has already been assigned.',
+      });
     }
 
     // Setel assignedTo dengan ID job_seeker yang mengambil pekerjaan
@@ -296,7 +381,10 @@ const applyForJob = async (req, res) => {
     await job.save();
 
     res.json({
-      success: true, message: 'Job applied successfully', jobId,
+      success: true,
+      status: 'success',
+      message: 'Job applied successfully',
+      jobId,
     });
   } catch (error) {
     console.error(error);
