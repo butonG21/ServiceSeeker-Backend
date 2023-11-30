@@ -2,7 +2,7 @@ const Job = require('../models/Job');
 
 const checkJobOwnership = async (req, res, next) => {
   try {
-    const jobId = req.query.id;
+    const jobId = req.params.id;
 
     // Temukan pekerjaan berdasarkan ID
     const job = await Job.findById(jobId);
