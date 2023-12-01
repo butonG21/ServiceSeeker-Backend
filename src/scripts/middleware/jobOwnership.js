@@ -21,11 +21,6 @@ const checkJobOwnership = async (req, res, next) => {
       return res.status(403).json({ message: 'Access denied. You are not the creator of this job.' });
     }
 
-    // Periksa apakah pekerjaan dalam status "Open"
-    if (job.status !== 'Open') {
-      return res.status(400).json({ message: 'Job cannot be edited. It is not in Open status.' });
-    }
-
     // Setel objek pekerjaan ke dalam request agar dapat diakses di endpoint selanjutnya
     req.job = job;
 

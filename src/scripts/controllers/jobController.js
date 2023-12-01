@@ -234,6 +234,11 @@ const editJobById = async (req, res) => {
       });
     }
 
+    // Periksa apakah pekerjaan dalam status "Open"
+    if (Job.status !== 'Open') {
+      return res.status(400).json({ message: 'Job cannot be edited. It is not in Open status.' });
+    }
+
     // Periksa apakah tidak ada data yang dikirimkan dalam body request
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json({
