@@ -6,7 +6,7 @@ const geocodeAddress = require('../utils/geocoding');
 const createJob = async (req, res) => {
   try {
     const {
-      title, category, budget, startDate, endDate, address, description,
+      title, category, budget, endDate, address, description,
     } = req.body;
 
     // hanya role tertentu yang dapat membuat pekerjaan
@@ -33,8 +33,6 @@ const createJob = async (req, res) => {
       description,
       category,
       budget,
-      startDate,
-      endDate,
       address,
       location: {
         type: 'Point',
@@ -43,16 +41,17 @@ const createJob = async (req, res) => {
       createdBy: req.user.username,
       status: 'Open', // Set status to Open when creating a new job
       createdAt: new Date().toISOString(), // Add timestamp of job creation
+      endDate,
     });
 
-    // Validasi startDate
+    // Validasi EndDate
     const currentDate = new Date();
-    const jobStartDate = new Date(startDate);
+    const jobEndDate = new Date(endDate);
 
-    if (jobStartDate < currentDate) {
+    if (jobEndDate < currentDate) {
       return res.status(400).json({
         status: ' Failed',
-        message: 'Start date must be equal to or greater than the current date.',
+        message: 'End date must be equal to or greater than the current date.',
       });
     }
 
@@ -249,7 +248,6 @@ const editJobById = async (req, res) => {
       description: req.body.description,
       category: req.body.category,
       budget: req.body.budget,
-      startDate: req.body.startDate,
       endDate: req.body.endDate,
       address: req.body.address,
       updatedAt: new Date().toISOString(),
@@ -364,7 +362,7 @@ const applyForJob = async (req, res) => {
     }
 
     // Periksa apakah job_seeker sudah mengajukan pekerjaan sebelumnya
-    if (job.assignedTo) {
+    if (job.TakenBY) {
       return res.status(400).json({
         status: ' Failed',
         message: 'Job has already been assigned.',
