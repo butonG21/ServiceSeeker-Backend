@@ -14,6 +14,7 @@ app.use(express.json());
 // Routes
 app.use('/auth', require('./routes/authRoutes'));
 app.use('/jobs', require('./routes/jobRoutes'));
+app.use('/reviews', require('./routes/reviewRoutes'));
 
 app.get('/users', async (req, res) => {
   const users = await User.find();
