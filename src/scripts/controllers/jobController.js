@@ -233,9 +233,10 @@ const editJobById = async (req, res) => {
         message: 'Invalid Job ID.',
       });
     }
+    const job = await Job.findById(jobId);
 
     // Periksa apakah pekerjaan dalam status "Open"
-    if (Job.status !== 'Open') {
+    if (job.status !== 'Open') {
       return res.status(400).json({ message: 'Job cannot be edited. It is not in Open status.' });
     }
 
