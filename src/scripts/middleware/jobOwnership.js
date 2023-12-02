@@ -7,13 +7,13 @@ const checkJobOwnership = async (req, res, next) => {
     // Temukan pekerjaan berdasarkan ID
     const job = await Job.findById(jobId);
 
-    if (req.user.role !== 'employer') {
-      return res.status(403).json({ message: 'Access denied. Only employers can edit and delete jobs.' });
-    }
-
     // Periksa apakah pekerjaan ditemukan
     if (!job) {
       return res.status(404).json({ message: 'Job not found.' });
+    }
+
+    if (req.user.role !== 'employer') {
+      return res.status(403).json({ message: 'Access denied. Employers Only' });
     }
 
     // Periksa apakah pengguna adalah pembuat pekerjaan

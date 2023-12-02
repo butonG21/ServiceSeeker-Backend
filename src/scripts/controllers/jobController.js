@@ -342,6 +342,22 @@ const applyForJob = async (req, res) => {
     // Temukan pekerjaan berdasarkan ID
     const job = await Job.findById(jobId);
 
+    // Pastikan jobId tidak kosong
+    if (!jobId) {
+      return res.status(400).json({
+        status: ' Failed',
+        message: 'Job ID is required.',
+      });
+    }
+
+    // Pastikan jobId adalah ObjectId yang valid
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({
+        status: ' Failed',
+        message: 'Invalid Job ID.',
+      });
+    }
+
     // Periksa apakah pekerjaan ditemukan
     if (!job) {
       return res.status(404).json({
@@ -395,6 +411,66 @@ const applyForJob = async (req, res) => {
   }
 };
 
+const updateJobStatus = async (req, res) => {
+  try {
+    const jobId = req.params.id;
+
+    // Temukan pekerjaan berdasarkan ID
+    const job = await Job.findById(jobId);
+
+    // Pastikan jobId tidak kosong
+    if (!jobId) {
+      return res.status(400).json({
+        status: ' Failed',
+        message: 'Job ID is required.',
+      });
+    }
+
+    // Pastikan jobId adalah ObjectId yang valid
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+      return res.status(400).json({
+        status: ' Failed',
+        message: 'Invalid Job ID.',
+      });
+    }
+
+    // Periksa apakah pekerjaan ditemukan
+    if (!job) {
+      return res.status(404).json({
+        status: 'Failed',
+        message: 'Job not found.',
+      });
+    }
+
+    // Periksa apakah status pekerjaan saat ini adalah "Process"
+    if (job.status !== 'Process') {
+      return res.status(400).json({
+        status: 'Failed',
+        message: 'Job status must be "Process" to mark it as finished.',
+      });
+    }
+
+    // Setel status pekerjaan menjadi "Finish"
+    job.status = 'Finish';
+
+    // Simpan perubahan ke dalam database
+    await job.save();
+
+    res.json({
+      success: true,
+      status: 'Success',
+      message: 'Job status updated to "Finish" successfully.',
+      jobId,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal Server Error',
+    });
+  }
+};
+
 module.exports = {
-  createJob, getAllJobs, searchJobs, jobDetail, editJobById, deleteJobById, applyForJob,
+  createJob, getAllJobs, searchJobs, jobDetail, editJobById, deleteJobById, applyForJob, updateJobStatus,
 };

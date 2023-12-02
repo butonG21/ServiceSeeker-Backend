@@ -26,4 +26,7 @@ router.delete('/:id', authenticateToken, checkJobOwnership, jobController.delete
 // Apply for a job
 router.post('/:id/apply', authenticateToken, jobController.applyForJob);
 
+// Update job status to finish
+router.put('/:id/finish', authenticateToken, checkJobOwnership, jobController.updateJobStatus);
+
 module.exports = router;
