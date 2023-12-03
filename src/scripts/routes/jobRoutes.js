@@ -5,25 +5,28 @@ const checkJobOwnership = require('../middleware/jobOwnership');
 
 const router = express.Router();
 
-// Membuat pekerjaan baru
-router.post('/create', authenticateToken, jobController.createJob);
-
 // Mendapatkan semua pekerjaan
 router.get('/all', jobController.getAllJobs);
 
 // Pencarian pekerjaan
-router.post('/search', authenticateToken, jobController.searchJobs);
+router.get('/search', authenticateToken, jobController.searchJobs);
+
+// Membuat pekerjaan baru
+router.post('/create', authenticateToken, jobController.createJob);
 
 // Job detail by id
-router.get('/detail', jobController.jobDetail);
+router.get('/detail/:id', jobController.jobDetail);
 
 // update jobs
-router.put('/edit', authenticateToken, checkJobOwnership, jobController.editJobById);
+router.put('/:id', authenticateToken, checkJobOwnership, jobController.editJobById);
 
 // delete job
-router.delete('/delete', authenticateToken, checkJobOwnership, jobController.deleteJobById);
+router.delete('/:id', authenticateToken, checkJobOwnership, jobController.deleteJobById);
 
 // Apply for a job
-router.post('/apply', authenticateToken, jobController.applyForJob);
+router.post('/:id/apply', authenticateToken, jobController.applyForJob);
+
+// Update job status to finish
+router.put('/:id/finish', authenticateToken, checkJobOwnership, jobController.updateJobStatus);
 
 module.exports = router;
