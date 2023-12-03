@@ -7,8 +7,8 @@ const router = express.Router();
 router.get('/all', authenticateToken, userController.getAllUsers);
 
 // Mendapatkan detail User
-router.get('/:id', authenticateToken, userController.getUserDetails);
+router.get('/:username', authenticateToken, userController.getUserDetails);
 
-router.get('/:id/jobs', authenticateToken, userController.getUserJobs);
+router.get('/:username/jobs', authenticateToken, userController.getUserJobs);
 
 module.exports = router;
