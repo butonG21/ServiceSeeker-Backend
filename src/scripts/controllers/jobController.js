@@ -473,5 +473,12 @@ const updateJobStatus = async (req, res) => {
 };
 
 module.exports = {
-  createJob, getAllJobs, searchJobs, jobDetail, editJobById, deleteJobById, applyForJob, updateJobStatus,
+  createJob,
+  getAllJobs,
+  searchJobs,
+  jobDetail,
+  editJobById,
+  deleteJobById,
+  applyForJob,
+  updateJobStatus,
 };
