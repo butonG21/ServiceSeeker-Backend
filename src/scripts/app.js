@@ -1,7 +1,6 @@
 const express = require('express');
 const connectDB = require('./config/db');
 require('dotenv').config();
-const User = require('./models/User');
 
 // Connect to database
 connectDB();
@@ -16,10 +15,7 @@ app.use('/auth', require('./routes/authRoutes'));
 app.use('/jobs', require('./routes/jobRoutes'));
 app.use('/reviews', require('./routes/reviewRoutes'));
 
-app.get('/users', async (req, res) => {
-  const users = await User.find();
-  res.json(users);
-});
+app.use('/users', require('./routes/userRoutes'));
 
 // Start server
 const PORT = process.env.PORT || 3000;
