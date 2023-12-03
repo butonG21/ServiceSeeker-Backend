@@ -22,6 +22,16 @@ const userSchema = new mongoose.Schema({
     },
   },
   createdAt: { type: Date, default: Date.now },
+
+});
+
+// Menambahkan transform option untuk menyembunyikan field password dari hasil JSON
+userSchema.set('toJSON', {
+  transform: (doc, ret) => {
+    const modifiedRet = { ...ret };
+    delete modifiedRet.password;
+    return modifiedRet;
+  },
 });
 
 const User = mongoose.model('User', userSchema);
