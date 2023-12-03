@@ -73,7 +73,7 @@ const createJob = async (req, res) => {
 // hanya menampilkan semua pekerjaan dengan status Open
 const getAllJobs = async (req, res) => {
   try {
-    const jobs = await Job.find({ status: 'Open' });
+    const jobs = await Job.find();
     res.json(jobs);
   } catch (error) {
     console.error(error);
