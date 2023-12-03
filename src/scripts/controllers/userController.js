@@ -13,8 +13,8 @@ const getAllUsers = async (req, res) => {
 
 const getUserDetails = async (req, res) => {
   try {
-    const { id } = req.params;
-    const user = await User.findById(id);
+    const { username } = req.params;
+    const user = await User.findOne({ username });
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -29,8 +29,8 @@ const getUserDetails = async (req, res) => {
 
 const getUserJobs = async (req, res) => {
   try {
-    const { userId } = req.params.id;
-    const jobs = await Job.find({ employer: userId });
+    const { username } = req.params;
+    const jobs = await Job.find({ employer: username });
 
     res.json(jobs);
   } catch (error) {
