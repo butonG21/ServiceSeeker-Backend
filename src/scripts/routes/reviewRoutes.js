@@ -1,5 +1,3 @@
-// routes/reviewRoutes.js
-
 const express = require('express');
 const reviewController = require('../controllers/reviewControler');
 const authenticateToken = require('../middleware/authenticateToken');
