@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 const Job = require('../models/Job');
 const geocodeAddress = require('../utils/geocoding');
+const { paginateResults, validatePage } = require('../utils/paginations');
 
 const createJob = async (req, res) => {
   try {
@@ -73,14 +74,38 @@ const createJob = async (req, res) => {
 // hanya menampilkan semua pekerjaan dengan status Open
 const getAllJobs = async (req, res) => {
   try {
+    const { page = 1 } = req.query;
+
+    // Validasi nilai halaman
+    validatePage(page);
+
     const jobs = await Job.find();
-    res.json(jobs);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      status: ' Failed',
-      message: 'Internal server error',
+
+    const pageSize = 10;
+
+    // Gunakan fungsi paginateResults untuk mendapatkan hasil yang dipaginasi
+    const paginatedJobs = paginateResults(jobs, page, pageSize);
+
+    res.json({
+      status: 'Success',
+      jobs: paginatedJobs.results,
+      currentPage: paginatedJobs.currentPage,
+      totalPages: paginatedJobs.totalPages,
     });
+  } catch (error) {
+    if (error.message.includes('Invalid page value')) {
+      res.status(400).json({
+        status: 'Failed',
+        message: error.message,
+      });
+    } else {
+      console.error(error);
+      // Tanggapi dengan kesalahan server yang umum
+      res.status(500).json({
+        status: 'Failed',
+        message: 'Internal Server Error',
+      });
+    }
   }
 };
 
@@ -91,6 +116,7 @@ const searchJobs = async (req, res) => {
     } = req.query;
 
     const searchRadius = radius || 10;
+    const pageSize = 10;
 
     let userLocation;
 
@@ -147,6 +173,7 @@ const searchJobs = async (req, res) => {
     }
 
     const jobs = await Job.find(query);
+    const paginatedJobs = paginateResults(jobs, req.query.page, pageSize);
 
     const deg2rad = (deg) => deg * (Math.PI / 180);
 
@@ -163,12 +190,16 @@ const searchJobs = async (req, res) => {
     };
 
     // Tambahkan informasi jarak ke setiap pekerjaan dalam hasil pencarian
-    const jobsWithDistance = jobs.map((job) => {
-      const distance = calculateDistance(userLocation.latitude, userLocation.longitude, job.location.coordinates[1], job.location.coordinates[0]);
-      return { ...job._doc, distance };
+    paginatedJobs.jobs.forEach((job) => {
+      const distance = calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        job.location.coordinates[1],
+        job.location.coordinates[0],
+      );
+      job.distance = distance;
     });
-
-    res.json({ success: true, jobs: jobsWithDistance });
+    res.json({ success: true, ...paginatedJobs });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: 'Internal Server Error' });
