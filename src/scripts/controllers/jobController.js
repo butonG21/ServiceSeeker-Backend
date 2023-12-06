@@ -86,12 +86,7 @@ const getAllJobs = async (req, res) => {
     // Gunakan fungsi paginateResults untuk mendapatkan hasil yang dipaginasi
     const paginatedJobs = paginateResults(jobs, page, pageSize);
 
-    res.json({
-      status: 'Success',
-      jobs: paginatedJobs.results,
-      currentPage: paginatedJobs.currentPage,
-      totalPages: paginatedJobs.totalPages,
-    });
+    res.json(paginatedJobs); // Menggunakan hasil paginasi langsung di sini
   } catch (error) {
     if (error.message.includes('Invalid page value')) {
       res.status(400).json({
@@ -112,7 +107,7 @@ const getAllJobs = async (req, res) => {
 const searchJobs = async (req, res) => {
   try {
     const {
-      title, category, address, radius, budgetRange,
+      title, category, address, radius, budgetRange, page = 1,
     } = req.query;
 
     const searchRadius = radius || 10;
@@ -173,8 +168,7 @@ const searchJobs = async (req, res) => {
     }
 
     const jobs = await Job.find(query);
-    const paginatedJobs = paginateResults(jobs, req.query.page, pageSize);
-
+    const paginatedJobs = paginateResults(jobs, page, pageSize);
     const deg2rad = (deg) => deg * (Math.PI / 180);
 
     // Fungsi untuk menghitung jarak antara dua titik koordinat menggunakan formula Haversine

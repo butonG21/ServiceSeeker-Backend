@@ -28,6 +28,7 @@ const paginateResults = (results, page, pageSize) => {
   const paginatedResults = results.slice(startIndex, endIndex);
 
   return {
+    status: 'Success',
     jobs: paginatedResults.map((job) => ({ ...job._doc, distance: job.distance })),
     currentPage,
     totalPages,
