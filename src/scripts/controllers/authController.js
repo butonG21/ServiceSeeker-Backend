@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { validationResult, check } = require('express-validator');
 const User = require('../models/User');
 const geocodeAddress = require('../utils/geocoding');
+const BlacklistToken = require('../models/blacklistToken');
 
 const maxFirstNameLength = 20;
 const maxLastNameLength = 20;
@@ -153,9 +154,29 @@ const login = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+const logout = async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+
+    if (!token) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    // Tambahkan token ke daftar token yang dinonaktifkan
+    await BlacklistToken.create({ token });
+
+    res.json({ success: true, message: 'Logout successful' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 module.exports = {
   register,
   login,
+  logout,
   registerValidationRules,
   validate,
 };
