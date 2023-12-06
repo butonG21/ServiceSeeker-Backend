@@ -9,4 +9,7 @@ router.post('/register', authController.registerValidationRules, authController.
 // Login
 router.post('/login', authController.login);
 
+// Logout
+router.post('/logout', authController.logout);
+
 module.exports = router;
