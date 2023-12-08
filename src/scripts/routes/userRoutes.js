@@ -16,4 +16,6 @@ router.put('/:username/profile', authenticateToken, authenticatedUser, userContr
 
 router.put('/:username/change-passwords', authenticateToken, authenticatedUser, userController.changeUserPassword);
 
+router.post('/:username/upload-profile-image', authenticateToken, userController.uploadProfileImage);
+
 module.exports = router;

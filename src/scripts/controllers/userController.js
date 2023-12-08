@@ -1,7 +1,9 @@
+/* eslint-disable max-len */
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const Job = require('../models/Job');
 const geocodeAddress = require('../utils/geocoding');
+const upload = require('../middleware/multerConfig');
 
 const getAllUsers = async (req, res) => {
   try {
@@ -143,6 +145,38 @@ const changeUserPassword = async (req, res) => {
   }
 };
 
+const uploadProfileImage = async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    // Cari pengguna berdasarkan username
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    upload.single('profileImage')(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ success: false, message: 'Error uploading image.' });
+      }
+
+      const imageUrl = req.file ? req.file.path : null;
+
+      // Update the profileImage field in the user document
+      user.profileImage = imageUrl;
+
+      // Save the updated user with the new profileImage
+      const updatedUser = await user.save();
+
+      res.status(200).json({ success: true, message: 'Image uploaded successfully', user: updatedUser });
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
 // Tambahkan fungsi-fungsi lain seperti mengupdate profil pengguna, dll.
 
 module.exports = {
@@ -151,4 +185,5 @@ module.exports = {
   getAllUsers,
   updateUserProfile,
   changeUserPassword,
+  uploadProfileImage,
 };
