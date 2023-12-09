@@ -25,6 +25,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'https://res.cloudinary.com/di4pghhmp/image/upload/v1701933301/profile-images/blank-profile-picture-973460_640_diudeh.png', // Set the default value to an empty string
   },
+  ratings: {
+    totalRating: { type: Number, default: 0 },
+    numberOfReviews: { type: Number, default: 0 },
+    averageRating: { type: Number, default: 0 },
+  },
   createdAt: { type: Date, default: Date.now },
 
 });
