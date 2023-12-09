@@ -71,7 +71,6 @@ const createJob = async (req, res) => {
   }
 };
 
-// hanya menampilkan semua pekerjaan dengan status Open
 const getAllJobs = async (req, res) => {
   try {
     const { page = 1 } = req.query;
@@ -86,7 +85,7 @@ const getAllJobs = async (req, res) => {
     // Gunakan fungsi paginateResults untuk mendapatkan hasil yang dipaginasi
     const paginatedJobs = paginateResults(jobs, page, pageSize);
 
-    res.json(paginatedJobs); // Menggunakan hasil paginasi langsung di sini
+    res.json(paginatedJobs);
   } catch (error) {
     if (error.message.includes('Invalid page value')) {
       res.status(400).json({
@@ -95,7 +94,6 @@ const getAllJobs = async (req, res) => {
       });
     } else {
       console.error(error);
-      // Tanggapi dengan kesalahan server yang umum
       res.status(500).json({
         status: 'Failed',
         message: 'Internal Server Error',
