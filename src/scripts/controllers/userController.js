@@ -7,11 +7,25 @@ const upload = require('../middleware/multerConfig');
 
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find();
-    res.json(users);
+    const users = await User.find({}, 'username fullName email role ratings createdAt');
+
+    const formattedUsers = users.map((user) => ({
+      username: user.username,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+      rating: user.ratings,
+      createdAt: user.createdAt,
+    }));
+
+    res.json({
+      success: true,
+      status: 'success',
+      data: formattedUsers,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ success: false, status: 'error', message: 'Internal server error' });
   }
 };
 
@@ -93,6 +107,11 @@ const updateUserProfile = async (req, res) => {
       if (newLocation) {
         user.location.coordinates = [newLocation.longitude, newLocation.latitude];
       }
+    }
+
+    // Perbarui fullName jika firstName atau lastName diubah
+    if (req.body.firstName || req.body.lastName) {
+      user.fullName = `${req.body.firstName} ${req.body.lastName}`.trim();
     }
 
     // Simpan perubahan ke dalam database
