@@ -69,14 +69,12 @@ const updateUserProfile = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Dapatkan data profil yang akan diubah dari request body
     const dataToUpdate = {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
       phone: req.body.phone,
       address: req.body.address,
-      // tambahkan bidang lain yang ingin diubah
     };
 
     // Periksa apakah tidak ada properti yang diubah
@@ -115,7 +113,7 @@ const updateUserProfile = async (req, res) => {
     }
 
     // Simpan perubahan ke dalam database
-    await user.save(); // Ganti req.user.save() menjadi user.save()
+    await user.save();
 
     res.json({
       success: true,
