@@ -1,0 +1,3 @@
+{
+    "start": "node src/scripts/app.js"
+}
