@@ -1,5 +1,6 @@
 const Review = require('../models/Review');
 const Job = require('../models/Job');
+const User = require('../models/User');
 
 const addReview = async (req, res) => {
   try {
@@ -43,6 +44,13 @@ const addReview = async (req, res) => {
     });
 
     await newReview.save();
+    // Update rata-rata rating pada user
+    const user = await User.findOne({ username: newReview.createdFor });
+    user.ratings.totalRating += rating;
+    user.ratings.numberOfReviews += 1;
+    user.ratings.averageRating = user.ratings.totalRating / user.ratings.numberOfReviews;
+
+    await user.save();
 
     res.status(201).json({ status: 'Success', message: 'Review added successfully.' });
   } catch (error) {
@@ -53,7 +61,7 @@ const addReview = async (req, res) => {
 
 const getAllReviewsForJobSeeker = async (req, res) => {
   try {
-    const jobSeekerId = req.user.username; // ID pengguna (job seeker)
+    const jobSeekerId = req.user.username;
 
     // Temukan semua ulasan yang ditujukan untuk job seeker
     const reviews = await Review.find({ createdFor: jobSeekerId });

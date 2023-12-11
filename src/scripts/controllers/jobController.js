@@ -1,7 +1,9 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable max-len */
 const mongoose = require('mongoose');
 const Job = require('../models/Job');
 const geocodeAddress = require('../utils/geocoding');
+const { paginateResults, validatePage } = require('../utils/paginations');
 
 const createJob = async (req, res) => {
   try {
@@ -70,27 +72,45 @@ const createJob = async (req, res) => {
   }
 };
 
-// hanya menampilkan semua pekerjaan dengan status Open
 const getAllJobs = async (req, res) => {
   try {
-    const jobs = await Job.find();
-    res.json(jobs);
+    const { page = 1 } = req.query;
+
+    // Validasi nilai halaman
+    validatePage(page);
+
+    const jobs = await Job.find({ status: 'Open' });
+
+    const pageSize = 10;
+
+    // Gunakan fungsi paginateResults untuk mendapatkan hasil yang dipaginasi
+    const paginatedJobs = paginateResults(jobs, page, pageSize);
+
+    res.json(paginatedJobs);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      status: ' Failed',
-      message: 'Internal server error',
-    });
+    if (error.message.includes('Invalid page value')) {
+      res.status(400).json({
+        status: 'Failed',
+        message: error.message,
+      });
+    } else {
+      console.error(error);
+      res.status(500).json({
+        status: 'Failed',
+        message: 'Internal Server Error',
+      });
+    }
   }
 };
 
 const searchJobs = async (req, res) => {
   try {
     const {
-      title, category, address, radius, budgetRange,
+      title, category, address, radius, budgetRange, page = 1,
     } = req.query;
 
     const searchRadius = radius || 10;
+    const pageSize = 10;
 
     let userLocation;
 
@@ -129,6 +149,8 @@ const searchJobs = async (req, res) => {
           $maxDistance: searchRadius * 1000, // radius dalam meter
         },
       },
+      status: 'Open',
+
     };
 
     // Tambahkan kategori ke query jika disertakan dalam permintaan
@@ -147,7 +169,7 @@ const searchJobs = async (req, res) => {
     }
 
     const jobs = await Job.find(query);
-
+    const paginatedJobs = paginateResults(jobs, page, pageSize);
     const deg2rad = (deg) => deg * (Math.PI / 180);
 
     // Fungsi untuk menghitung jarak antara dua titik koordinat menggunakan formula Haversine
@@ -163,12 +185,16 @@ const searchJobs = async (req, res) => {
     };
 
     // Tambahkan informasi jarak ke setiap pekerjaan dalam hasil pencarian
-    const jobsWithDistance = jobs.map((job) => {
-      const distance = calculateDistance(userLocation.latitude, userLocation.longitude, job.location.coordinates[1], job.location.coordinates[0]);
-      return { ...job._doc, distance };
+    paginatedJobs.jobs.forEach((job) => {
+      const distance = calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        job.location.coordinates[1],
+        job.location.coordinates[0],
+      );
+      job.distance = distance;
     });
-
-    res.json({ success: true, jobs: jobsWithDistance });
+    res.json({ success: true, ...paginatedJobs });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: 'Internal Server Error' });
