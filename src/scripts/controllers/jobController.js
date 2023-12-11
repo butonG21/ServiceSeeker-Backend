@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable max-len */
 const mongoose = require('mongoose');
 const Job = require('../models/Job');
@@ -78,7 +79,7 @@ const getAllJobs = async (req, res) => {
     // Validasi nilai halaman
     validatePage(page);
 
-    const jobs = await Job.find();
+    const jobs = await Job.find({ status: 'Open' });
 
     const pageSize = 10;
 
@@ -148,6 +149,8 @@ const searchJobs = async (req, res) => {
           $maxDistance: searchRadius * 1000, // radius dalam meter
         },
       },
+      status: 'Open',
+
     };
 
     // Tambahkan kategori ke query jika disertakan dalam permintaan
