@@ -4,8 +4,7 @@
   "description": "aplikasi pencari jasa terdekat",
   "main": "app.js",
   "scripts": {
-    "start-dev": "nodemon src/scripts/app.js",
-    "start": "node src/scripts/app.js"
+    "start-dev": "nodemon index.js"
   },
   "author": "",
   "license": "ISC",

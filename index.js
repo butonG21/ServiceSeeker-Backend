@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const connectDB = require('./config/db');
+const connectDB = require('./src/scripts/config/db');
 require('dotenv').config();
 
 // Connect to database
@@ -13,11 +13,11 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/auth', require('./routes/authRoutes'));
-app.use('/jobs', require('./routes/jobRoutes'));
-app.use('/reviews', require('./routes/reviewRoutes'));
+app.use('/auth', require('./src/scripts/routes/authRoutes'));
+app.use('/jobs', require('./src/scripts/routes/jobRoutes'));
+app.use('/reviews', require('./src/scripts/routes/reviewRoutes'));
 
-app.use('/users', require('./routes/userRoutes'));
+app.use('/users', require('./src/scripts/routes/userRoutes'));
 
 // Start server
 const PORT = process.env.PORT || 3000;
