@@ -1,5 +1,3 @@
-# ServiceSeeker-Backend
-
 # Service Seeker API Documentation
 
 Welcome to the API documentation for Service Seeker. This document provides information about the available endpoints and how to interact with the Service Seeker API.
@@ -58,23 +56,25 @@ Register a new user.
   "lastName": "doe",
   "username": "john_doe",
   "email": "john.doe@example.com",
-  "phone": "6282134567"
+  "phone": "6282134567",
   "role": "job_seeker",
-  "address": "Cikarang"
+  "address": "Cikarang",
   "password": "securepassword",
 }
 ```
 **JSON body parameters**
-|         Name                | Type    | Rules                                                                                                            | Descriptions                                                                  |
-| -------------------------   | ------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------    |
-| firstName`Required`         | string  | Must have a length between 3 and the specified maximum length (`20`).                            | The first name should have a valid length, not exceeding the specified maximum length.                 |              
-| lastName`Optional`          | string  | Optional, but if provided, must have a length between 3 and the specified maximum length (`20`).  | The last name, if provided, should have a valid length, not exceeding the specified maximum length.   |
-| username `Required`         | string  | Must be unique; checked against existing usernames in the database.                                              | The username should be unique and not already exist in the database.                   |
-| email `Required`            | string  | Must be a valid email format.<br> - Must be unique; checked against existing email addresses in the database.    | The email should be in a valid format, and it should be unique in the database.         |
-| phone `Required`            | string  | Must be numeric.                                                                                                 | The phone number should consist of only numeric characters.                                            |
-| role  `Required`            | string  | Must be either 'employer' or 'job_seeker'.                                                                       | The role should be either 'employer' or 'job_seeker'.                                                  |
-| address `Required`          | string  | Must have a length not exceeding 255 characters.                                                                 | The address should have a valid length, not exceeding the specified maximum length 255 character.                    |
-| password  `Required`        | string  |                                                                                                                  |
+
+| Name                     | Type   | Rules                                                                                                       | Descriptions                                                             |
+| ------------------------ | ------ | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| firstName`Required`      | string | Must have a length between 3 and the specified maximum length (`20`).                                      | The first name should have a valid length, not exceeding the specified maximum length. |
+| lastName`Optional`       | string | Optional, but if provided, must have a length between 3 and the specified maximum length (`20`).             | The last name, if provided, should have a valid length, not exceeding the specified maximum length. |
+| username `Required`      | string | Must be unique; checked against existing usernames in the database.                                         | The username should be unique and not already exist in the database.       |
+| email `Required`         | string | Must be a valid email format.<br> - Must be unique; checked against existing email addresses in the database. | The email should be in a valid format, and it should be unique in the database. |
+| phone `Required`         | string | Must be numeric.                                                                                           | The phone number should consist of only numeric characters.               |
+| role  `Required`         | string | Must be either 'employer' or 'job_seeker'.                                                                | The role should be either 'employer' or 'job_seeker'.                     |
+| address `Required`       | string | Must have a length not exceeding 255 characters.                                                          | The address should have a valid length, not exceeding the specified maximum length of 255 characters. |
+| password  `Required`     | string |                                                                                                           |                                                                         |
+
 
 
 
@@ -94,7 +94,7 @@ Register a new user.
 
 ### Login
 
-Log in with an existing user.and retrieve the token.
+Log in with an existing user.and retrieve the token
 
 - **Method**: `POST`
 - **Path**: `/auth/login`
@@ -117,7 +117,7 @@ Log in with an existing user.and retrieve the token.
   "data": {
       "token": "user_access_token"
     },
-
+}
 ```
 The token will be valid for 24 hours.
 
@@ -127,8 +127,6 @@ The token will be valid for 24 hours.
 - `500 Internal Server Error`: Failed on Server side
 
 ### Logout
-
-#### `POST /auth/logout`
 
 Allows the user to logout of the session and invalidates the token before it expires.
 
@@ -154,10 +152,10 @@ Allows the user to logout of the session and invalidates the token before it exp
 
 
 
-### Users
+## Users
 
-#### Get All Users
-##### all logged in or authenticated users can access this EndPoint
+### Get All Users
+** all logged in or authenticated users can access this EndPoint **
 
 - **Method**: `GET`
 - **Path**: `/users/all`
@@ -204,8 +202,7 @@ Allows the user to logout of the session and invalidates the token before it exp
 - `401 Unauthorized`: Token is missing or invalid.
 - `500 Internal Server Error`: Failed on Server side
 
-#### Get Detail of user by Username
-##### only
+### Get Detail of user by Username
 - **Method**: `GET`
 - **Path**: `/users/:username`
 - **Response Code**: `200 OK`
@@ -216,7 +213,7 @@ Allows the user to logout of the session and invalidates the token before it exp
   "success": true,
   "status": "success",
     "data": [
-        {
+    {
             "user": {
                 "location": {
                     "type": "Point",
@@ -242,7 +239,9 @@ Allows the user to logout of the session and invalidates the token before it exp
                 "profileImage": "user image Url",
                 "createdAt": "2023-12-06T22:00:40.781Z",
             }
-        },
+         },
+    ]
+}
 ```
 
 **Error Response:**
@@ -250,7 +249,7 @@ Allows the user to logout of the session and invalidates the token before it exp
 - `404 Not Found`: User not found.
 - `500 Internal Server Error`: Failed on Server side
 
-#### Get User Jobs
+### Get User Jobs
 - **Method**: `GET`
 - **Path**: `/users/:username/jobs`
 - **Authorization Header**: `Authorization: user_access_token`
@@ -280,7 +279,7 @@ Allows the user to logout of the session and invalidates the token before it exp
 - `404 Not Found`: User not found.
 - `500 Internal Server Error`: Failed on Server side
 
-#### Update User Profile
+### Update User Profile
 - **Method**: `PUT`
 - **Path**: `/users/:username`
 - **Authorization Header**: `Authorization: user_access_token`
@@ -325,7 +324,7 @@ Allows the user to logout of the session and invalidates the token before it exp
 - `422 Unprocessable Entity`: Validation error on input parameters.
 - `500 Internal Server Error`: Failed on Server side
 
-#### Change User Password
+### Change User Password
 - **Method**: `PUT`
 - **Path**: `/users/:username/change-password`
 - **Authorization Header**: `Authorization: user_access_token`
@@ -354,7 +353,7 @@ Allows the user to logout of the session and invalidates the token before it exp
 - `422 Unprocessable Entity`: Validation error on input parameters.
 - `500 Internal Server Error`: Failed on Server side
 
-#### Upload Image Profile
+### Upload Image Profile
 - **Method**: `POST`
 - **Path**: `/users/:username/upload-profile-image`
 - **Authorization Header**: `Authorization: user_access_token`
