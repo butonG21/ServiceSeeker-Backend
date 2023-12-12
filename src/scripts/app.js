@@ -1,7 +1,7 @@
 const { join } = require('path');
 const express = require('express');
 const cors = require('cors');
-const connectDB = require('./src/scripts/config/db');
+const connectDB = require('./config/db');
 require('dotenv').config();
 
 // Connect to database
@@ -23,11 +23,11 @@ app.get('/', (req, res) => {
 app.get('/README.md', (req, res) => {
   res.sendFile(join(__dirname, '../../docs', 'README.md'));
 });
-app.use('/auth', require('./src/scripts/routes/authRoutes'));
-app.use('/jobs', require('./src/scripts/routes/jobRoutes'));
-app.use('/reviews', require('./src/scripts/routes/reviewRoutes'));
+app.use('/auth', require('./routes/authRoutes'));
+app.use('/jobs', require('./routes/jobRoutes'));
+app.use('/reviews', require('./routes/reviewRoutes'));
 
-app.use('/users', require('./src/scripts/routes/userRoutes'));
+app.use('/users', require('./routes/userRoutes'));
 
 // Start server
 const PORT = process.env.PORT || 3000;
