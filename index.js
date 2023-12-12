@@ -1,3 +1,4 @@
+const { join } = require('path');
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./src/scripts/config/db');
@@ -13,6 +14,15 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+app.use(express.static(join(__dirname, '../../docs')));
+
+app.get('/', (req, res) => {
+  res.sendFile(join(__dirname, '../../docs', 'index.html'));
+});
+
+app.get('/README.md', (req, res) => {
+  res.sendFile(join(__dirname, '../../docs', 'README.md'));
+});
 app.use('/auth', require('./src/scripts/routes/authRoutes'));
 app.use('/jobs', require('./src/scripts/routes/jobRoutes'));
 app.use('/reviews', require('./src/scripts/routes/reviewRoutes'));
