@@ -193,6 +193,8 @@ const login = async (req, res) => {
       status: 'success',
       message: 'Login successful',
       data: {
+        username: user.username,
+        role: user.role,
         token,
       },
     });
