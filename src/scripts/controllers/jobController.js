@@ -321,7 +321,21 @@ const jobDetail = async (req, res) => {
     }
 
     // Tampilkan detail pekerjaan
-    res.json({ success: true, job });
+    res.json({
+      success: true,
+      jobId: job._id,
+      title: job.title,
+      description: job.description,
+      category: job.category,
+      budget: job.budget,
+      address: job.address,
+      createdBy: job.createdBy,
+      status: job.status,
+      TakenBY: job.TakenBY,
+      createdAt: job.createdAt,
+      endDate: job.endDate,
+      updatedAt: job.updatedAt,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: 'Internal Server Error' });
