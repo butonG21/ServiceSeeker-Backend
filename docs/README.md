@@ -115,6 +115,8 @@ Log in with an existing user.and retrieve the token
   "status": "success",
   "message": "Login successful",
   "data": {
+      "username": "username",
+      "role": "role",
       "token": "user_access_token"
     },
 }
@@ -361,7 +363,7 @@ Allows the user to logout of the session and invalidates the token before it exp
 
 **Request Body:**
 ```
-Form-data: { "image": [image_file] }
+Form-data: { "profileImage": [image_file] }
 ```
 
 **Response:**
@@ -370,15 +372,17 @@ Form-data: { "image": [image_file] }
   "success": true,
   "status": "success",
   "message": "Profile image uploaded successfully",
-  "data": {
-    "imageUrl": "https://yourcdn.com/images/john_doe_profile.jpg"
+  "userData": {
+    // ... other userData,
+    "profileImage": "https://res.cloudinary.com/di4pghhmp/image/upload/v1702499173/profile-images/profile-image.png",
+    // ... other userData,
   }
 }
 ```
 
 **Error Response:**
+- `400 Bad Request` : The request cannot be fulfilled due Error uploading image.
 - `401 Unauthorized`: Token is missing or invalid.
-- `422 Unprocessable Entity`: Validation error on input parameters.
 - `500 Internal Server Error`: Failed on Server side
 
 
@@ -521,15 +525,16 @@ Form-data: { "image": [image_file] }
 - **Response Code**: `200 OK`
 
 **Query Parameters:**
-| Name                     | Type   | Description                                                                                                      |
-| ------------------------ | ------ | ----------------------------------------------------------------------------------------------------------- |
-| title`optional`      | string | Search by job title.  |
-| radius`optional`      | number |  Search radius in kilometers.  |
-| budgetRange`optional`      | object | Filter jobs by budget range (min, max).  |
-| status`optional`      | string | Filter jobs by status ('Open', 'Process', 'Finish', 'all').  |
-| sort`optional`      | string | Sort order ('asc' or 'desc') |
-| category`optional`      | string | Filter by job category |
-| page`optional`      | Number | Page number for pagination |
+
+| Name              | Type    | Description                                                  |
+| ----------------- | ------- | ------------------------------------------------------------ |
+| title`optional`   | string  | Search by job title.                                         |
+| radius`optional`  | number  | Search radius in kilometers.                                  |
+| budgetRange`optional` | object | Filter jobs by budget range (min, max).                      |
+| status`optional`  | string  | Filter jobs by status ('Open', 'Process', 'Finish', 'all'). Default is 'Open'. |
+| sort`optional`    | string  | Sort order ('asc' or 'desc').                                 |
+| category`optional`| string  | Filter by job category.                                       |
+| page`optional`    | Number  | Page number for pagination.                                   |
 
 **Response:**
 ```json
