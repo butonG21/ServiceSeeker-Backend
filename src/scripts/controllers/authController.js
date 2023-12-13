@@ -42,6 +42,7 @@ const registerValidationRules = [
   }),
 
   check('address').isLength({ max: 255 }).escape(),
+  check('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long.'),
 ];
 
 const validate = (req, res, next) => {
