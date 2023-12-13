@@ -175,7 +175,7 @@ const uploadProfileImage = async (req, res) => {
 
     upload.single('profileImage')(req, res, async (err) => {
       if (err) {
-        return res.status(400).json({ success: false, message: 'Error uploading image.' });
+        return res.status(400).json({ success: false, message: 'Error uploading image.', error: err.message });
       }
 
       const imageUrl = req.file ? req.file.path : null;
