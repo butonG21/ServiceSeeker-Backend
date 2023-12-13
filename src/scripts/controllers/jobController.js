@@ -123,7 +123,7 @@ const getAllJobs = async (req, res) => {
     // Tambahkan fitur pengurutan jika sort parameter tersedia
     if (sort) {
       const sortOrder = sort === 'asc' ? 1 : -1;
-      jobsQuery.sort({ createdAt: sortOrder }); // Gantilah dengan kolom yang sesuai
+      jobsQuery.sort({ createdAt: sortOrder });
     }
 
     const jobs = await jobsQuery.exec();
@@ -132,14 +132,27 @@ const getAllJobs = async (req, res) => {
 
     const paginatedJobs = paginateResults(jobs, page, pageSize);
 
-    // jumlah pekerjaan
-    const totalJobs = jobs.length;
+    const simplifiedJobs = Array.isArray(paginatedJobs.jobs)
+      ? paginatedJobs.jobs.map((job) => ({
+        id: job._id,
+        title: job.title,
+        description: job.description,
+        category: job.category,
+        budget: job.budget,
+        address: job.address,
+        createdBy: job.createdBy,
+        createdAt: job.createdAt,
+        endDate: job.endDate,
+      }))
+      : [];
 
     res.json({
-      totalJobs,
-      page,
-      pageSize,
-      jobs: paginatedJobs,
+      success: true,
+      totalJobs: simplifiedJobs.length, // jumlah jobs yang ada
+      page: paginatedJobs.currentPage, // posisi page sekarang
+      pageSize, // jumlah min jobs dalam tiap page
+      totalPages: paginatedJobs.totalPages, // total pages yang ada
+      jobs: simplifiedJobs, // list jobs
     });
   } catch (error) {
     if (
@@ -148,6 +161,7 @@ const getAllJobs = async (req, res) => {
       || error.message.includes('Invalid sort value')
     ) {
       res.status(400).json({
+        success: false,
         status: 'Failed',
         message: error.message,
       });
