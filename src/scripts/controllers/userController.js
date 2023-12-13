@@ -186,7 +186,7 @@ const uploadProfileImage = async (req, res) => {
       // Save the updated user with the new profileImage
       const updatedUser = await user.save();
 
-      res.status(200).json({ success: true, message: 'Image uploaded successfully', user: updatedUser });
+      res.status(200).json({ success: true, message: 'Image uploaded successfully', userData: updatedUser });
     });
   } catch (error) {
     console.error(error);
