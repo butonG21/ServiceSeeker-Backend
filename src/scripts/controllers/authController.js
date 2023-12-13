@@ -83,7 +83,7 @@ const register = async (req, res) => {
 
     // Check if required properties are missing
     const requiredProperties = ['firstName', 'username', 'email', 'phone', 'role', 'password', 'address'];
-    const missingProperties = requiredProperties.filter((prop) => !req.body.hasOwnProperty(prop) || req.body[prop] === '');
+    const missingProperties = requiredProperties.filter((prop) => !Object.prototype.hasOwnProperty.call(req.body, prop) || req.body[prop] === '');
 
     if (missingProperties.length > 0) {
       return res.status(400).json({

@@ -41,8 +41,8 @@ const createJob = async (req, res) => {
         coordinates: [location.longitude, location.latitude],
       },
       createdBy: req.user.username,
-      status: 'Open', // Set status to Open when creating a new job
-      createdAt: new Date().toISOString(), // Add timestamp of job creation
+      status: 'Open',
+      createdAt: new Date().toISOString(),
       endDate,
     });
 
@@ -72,23 +72,81 @@ const createJob = async (req, res) => {
   }
 };
 
+// validasi nilai status
+const validateStatus = (status) => {
+  const allowedStatusValues = ['Open', 'Process', 'Finish', 'all'];
+
+  if (!allowedStatusValues.includes(status)) {
+    throw new Error('Invalid status value');
+  }
+};
+
+// validasi nilai sort
+const validateSort = (sort) => {
+  const allowedSortValues = ['asc', 'desc'];
+
+  if (sort && !allowedSortValues.includes(sort)) {
+    throw new Error('Invalid sort value');
+  }
+};
+
 const getAllJobs = async (req, res) => {
   try {
-    const { page = 1 } = req.query;
+    const {
+      page = 1,
+      category,
+      sort,
+      status = 'Open',
+    } = req.query;
 
     // Validasi nilai halaman
     validatePage(page);
 
-    const jobs = await Job.find({ status: 'Open' });
+    // Validasi nilai status
+    validateStatus(status);
+
+    // Validasi nilai sort
+    validateSort(sort);
+
+    // Buat objek query untuk pencarian
+    const query = {};
+    if (category) {
+      query.category = category;
+    }
+
+    if (status !== 'all') {
+      query.status = status;
+    }
+
+    const jobsQuery = Job.find(query);
+
+    // Tambahkan fitur pengurutan jika sort parameter tersedia
+    if (sort) {
+      const sortOrder = sort === 'asc' ? 1 : -1;
+      jobsQuery.sort({ createdAt: sortOrder }); // Gantilah dengan kolom yang sesuai
+    }
+
+    const jobs = await jobsQuery.exec();
 
     const pageSize = 10;
 
-    // Gunakan fungsi paginateResults untuk mendapatkan hasil yang dipaginasi
     const paginatedJobs = paginateResults(jobs, page, pageSize);
 
-    res.json(paginatedJobs);
+    // jumlah pekerjaan
+    const totalJobs = jobs.length;
+
+    res.json({
+      totalJobs,
+      page,
+      pageSize,
+      jobs: paginatedJobs,
+    });
   } catch (error) {
-    if (error.message.includes('Invalid page value')) {
+    if (
+      error.message.includes('Invalid page value')
+      || error.message.includes('Invalid status value')
+      || error.message.includes('Invalid sort value')
+    ) {
       res.status(400).json({
         status: 'Failed',
         message: error.message,
@@ -106,7 +164,7 @@ const getAllJobs = async (req, res) => {
 const searchJobs = async (req, res) => {
   try {
     const {
-      title, category, address, radius, budgetRange, page = 1,
+      title, category, address, radius, budgetRange, page = 1, sort, status = 'Open',
     } = req.query;
 
     const searchRadius = radius || 10;
@@ -114,10 +172,10 @@ const searchJobs = async (req, res) => {
 
     let userLocation;
 
-    // Pastikan hanya pengguna yang login yang dapat menggunakan fitur ini
+    // hanya pengguna yang login yang dapat menggunakan fitur ini
     if (!req.user || !req.user.location) {
       return res.status(403).json({
-        status: ' Failed',
+        success: false,
         message: 'Access denied. Only logged-in users can use this feature.',
       });
     }
@@ -133,7 +191,7 @@ const searchJobs = async (req, res) => {
     // Pastikan lokasi atau alamat valid
     if (!userLocation) {
       return res.status(400).json({
-        status: ' Failed',
+        success: false,
         message: 'Invalid address or location.',
       });
     }
@@ -149,8 +207,6 @@ const searchJobs = async (req, res) => {
           $maxDistance: searchRadius * 1000, // radius dalam meter
         },
       },
-      status: 'Open',
-
     };
 
     // Tambahkan kategori ke query jika disertakan dalam permintaan
@@ -168,7 +224,18 @@ const searchJobs = async (req, res) => {
       query.title = { $regex: title, $options: 'i' }; // i untuk case-insensitive
     }
 
-    const jobs = await Job.find(query);
+    const jobsQuery = Job.find(query).select('-__v');
+    if (sort) {
+      const sortOrder = sort === 'asc' ? 1 : -1;
+      jobsQuery.sort({ createdAt: sortOrder });
+    }
+
+    if (status !== 'all') {
+      query.status = status;
+    }
+
+    const jobs = await jobsQuery.exec();
+
     const paginatedJobs = paginateResults(jobs, page, pageSize);
     const deg2rad = (deg) => deg * (Math.PI / 180);
 
@@ -194,7 +261,14 @@ const searchJobs = async (req, res) => {
       );
       job.distance = distance;
     });
-    res.json({ success: true, ...paginatedJobs });
+
+    res.json({
+      success: true,
+      totalJobs: jobs.length,
+      page,
+      pageSize,
+      jobs: paginatedJobs,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: 'Internal Server Error' });
