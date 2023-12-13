@@ -415,12 +415,13 @@ Form-data: { "image": [image_file] }
 }
 ```
 **Query Parameters:**
-| Name                     | Type   | Description                                                                                                      |
-| ------------------------ | ------ | ----------------------------------------------------------------------------------------------------------- |
-| status`optional`      | string | Filter jobs by status ('Open', 'Process', 'Finish', 'all') default 'Open'.  |
-| sort`optional`      | string | Sort order ('asc' or 'desc') |
-| category`optional`      | string | Filter by job category |
-| page`optional`      | Number | Page number for pagination |
+
+| Name          | Type    | Description                                              |
+| ------------- | ------- | -------------------------------------------------------- |
+| status`optional` | string | Filter jobs by status ('Open', 'Process', 'Finish', 'all'). Default is 'Open'. |
+| sort`optional`   | string | Sort order ('asc' or 'desc').                            |
+| category`optional` | string | Filter by job category.                                   |
+| page`optional`    | Number  | Page number for pagination.                               |
 
 **Error Response:**
 - `400 Bad Request`: Invalid input parameters.
