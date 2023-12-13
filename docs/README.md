@@ -392,6 +392,7 @@ Form-data: { "image": [image_file] }
 
 **Response:**
 ```json
+{
  "success": true,
     "totalJobs": 7,
     "page": 1,
@@ -561,7 +562,8 @@ Form-data: { "image": [image_file] }
                 "distance": "job distance from user location"
             },
     // ... other jobs
-  ]
+              ]
+            }
 }
 ```
 
