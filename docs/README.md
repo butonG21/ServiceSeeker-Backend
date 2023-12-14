@@ -662,6 +662,37 @@ Form-data: { "profileImage": [image_file] }
 - `404 Not Found`: Job not found.
 - `500 Internal Server Error`: Failed on Server side
 
+### Count Jobs by Category
+
+Count the number of jobs based on category.
+
+- **URL:** `/jobs/countByCategory`
+- **Method:** `GET`
+- **Success Response:**
+  - **Code:** 200
+  - **Content:** An array of objects containing category and count.
+
+    ```json
+    {
+      "success": true,
+      "data": [
+          {
+            "_id": "Category1",
+            "count": 10
+          },
+          {
+            "_id": "Category2",
+            "count": 5
+          },
+          // ...
+        ]
+    }
+    ```
+
+- **Error Response:**
+  - **Code:** 500
+  - **Content:** `{ "message": "Internal Server Error" }`
+
 ## Reviews
 
 ### Add Review
