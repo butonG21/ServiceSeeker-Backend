@@ -8,6 +8,8 @@ const router = express.Router();
 // Mendapatkan semua pekerjaan
 router.get('/all', jobController.getAllJobs);
 
+router.get('/countByCategory', jobController.countByCategory);
+
 // Pencarian pekerjaan
 router.get('/search', authenticateToken, jobController.searchJobs);
 

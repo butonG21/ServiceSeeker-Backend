@@ -600,6 +600,25 @@ const updateJobStatus = async (req, res) => {
   }
 };
 
+const countByCategory = async (req, res) => {
+  try {
+    // Menggunakan aggregation untuk menghitung pekerjaan berdasarkan kategori
+    const jobCounts = await Job.aggregate([
+      {
+        $group: {
+          _id: '$category',
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    res.json({ success: true, data: jobCounts });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
 module.exports = {
   createJob,
   getAllJobs,
@@ -609,4 +628,5 @@ module.exports = {
   deleteJobById,
   applyForJob,
   updateJobStatus,
+  countByCategory,
 };
