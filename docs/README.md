@@ -175,6 +175,7 @@ Allows the user to logout of the session and invalidates the token before it exp
             "fullName": "john doe",
             "email": "john_doe@gmail.com",
             "role": "employer",
+            "profileImage": "user image Url",
             "rating": {
                 "totalRating": 3.5,
                 "numberOfReviews": 2,
@@ -187,6 +188,7 @@ Allows the user to logout of the session and invalidates the token before it exp
             "fullName": "anna mclaren",
             "email": "anna@gmail.com",
             "role": "job_seeker",
+            "profileImage": "user image Url",
             "rating": {
                 "totalRating": 5,
                 "numberOfReviews": 2,
@@ -204,9 +206,10 @@ Allows the user to logout of the session and invalidates the token before it exp
 - `401 Unauthorized`: Token is missing or invalid.
 - `500 Internal Server Error`: Failed on Server side
 
-### Get Detail of user by Username
+### Get Detail of user/user profile
 - **Method**: `GET`
-- **Path**: `/users/:username`
+- **Path**: `/users/me`
+- **Authorization Header**: `Authorization: user_access_token`
 - **Response Code**: `200 OK`
 
 **Response:**
@@ -242,6 +245,39 @@ Allows the user to logout of the session and invalidates the token before it exp
                 "createdAt": "2023-12-06T22:00:40.781Z",
             }
          },
+    ]
+}
+```
+
+**Error Response:**
+- `401 Unauthorized`: Token is missing or invalid.
+- `500 Internal Server Error`: Failed on Server side
+
+
+### Get Detail of user by Username
+- **Method**: `GET`
+- **Path**: `/users/:username`
+- **Response Code**: `200 OK`
+
+**Response:**
+```json
+{
+  "success": true,
+    "status": "success",
+    "data": [
+        {
+            "username": "john_doe",
+            "fullName": "john doe",
+            "email": "john_doe@gmail.com",
+            "role": "employer",
+            "profileImage": "user image Url",
+            "rating": {
+                "totalRating": 3.5,
+                "numberOfReviews": 2,
+                "averageRating": 7
+            },
+            "createdAt": "2023-12-06T22:00:40.781Z"
+        },
     ]
 }
 ```
