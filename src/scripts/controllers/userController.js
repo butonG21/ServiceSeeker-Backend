@@ -7,13 +7,14 @@ const upload = require('../middleware/multerConfig');
 
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({}, 'username fullName email role ratings createdAt');
+    const users = await User.find({}, 'username fullName email role ratings createdAt profileImage');
 
     const formattedUsers = users.map((user) => ({
       username: user.username,
       fullName: user.fullName,
       email: user.email,
       role: user.role,
+      imageProfile: user.profileImage,
       rating: user.ratings,
       createdAt: user.createdAt,
     }));
@@ -22,6 +23,29 @@ const getAllUsers = async (req, res) => {
       success: true,
       status: 'success',
       data: formattedUsers,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, status: 'error', message: 'Internal server error' });
+  }
+};
+
+const getCurrentUser = async (req, res) => {
+  try {
+    // Dapatkan username dari req.user
+    const { username } = req.user;
+
+    // Dapatkan data pengguna dari database berdasarkan username
+    const currentUser = await User.findOne({ username });
+
+    if (!currentUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({
+      success: true,
+      status: 'success',
+      data: currentUser,
     });
   } catch (error) {
     console.error(error);
@@ -38,7 +62,19 @@ const getUserDetails = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json(user);
+    res.json({
+      success: true,
+      status: 'success',
+      data: {
+        username: user.username,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        imageProfile: user.profileImage,
+        ratings: user.ratings,
+        createdAt: user.createdAt,
+      },
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
@@ -198,6 +234,7 @@ const uploadProfileImage = async (req, res) => {
 
 module.exports = {
   getUserDetails,
+  getCurrentUser,
   getUserJobs,
   getAllUsers,
   updateUserProfile,

@@ -6,6 +6,7 @@ const authenticatedUser = require('../middleware/authenticateUser');
 const router = express.Router();
 
 router.get('/all', authenticateToken, userController.getAllUsers);
+router.get('/me', authenticateToken, userController.getCurrentUser);
 
 // Mendapatkan detail User
 router.get('/:username', authenticateToken, userController.getUserDetails);
